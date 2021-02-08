@@ -1,0 +1,45 @@
+#+TITLE: VotingTrees
+
+VotingTrees is a set of routines for implementing https://en.wikipedia.org/wiki/Proxy_voting#Delegated_voting
+
+At this moment there are MySQL stored procedures and some PHP stuff.
+
+It's *UNCOMPLETE, UNTESTED, UNMANTAINED and EXPERIMENTAL. BUGS* ahead.
+Use at your own risk. (or maybe just get inspired by)
+
+** Creating MyISAM tables and stored procedures
+   In src folder you can:
+   ~cat *.sql | mysql [DB_name] [...]~
+
+** You can try some stuff in PHP
+#+BEGIN_SRC php
+<?php
+include("VTvotingTrees.class.php");
+$mysqli=mysqli_connect("dbhost","dbuser","password","database");
+$votingtrees=new VTvotingTrees($mysqli);
+
+# four users are taking care about "the issue"
+$votingtrees->addUserIssueByName(1,"the issue",TRUE);
+$votingtrees->addUserIssueByName(2,"the issue",TRUE);
+$votingtrees->addUserIssueByName(3,"the issue",TRUE);
+$votingtrees->addUserIssueByName(4,"the issue",TRUE);
+
+# some are delegating their "vote" to other users
+$issue=$votingtrees->getIssueByName("the issue");
+$issue->delegate(1,2);
+$issue->delegate(2,3);
+$issue->delegate(4,3);
+
+# the "tree" should look like this
+# 3_
+# | \ 
+# 2 4
+# |
+# 1
+
+
+# check VTdelegate table or $patharray after calling
+$issue->getPathToTop(1,$patharray);
+print_r($patharray);
+?>
+#+END_SRC
